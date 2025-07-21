@@ -132,7 +132,7 @@ void* customMalloc(int size) {
 /* 
     Merges node1 and node2. node1 must come before node2.
 */
-void mergeNodes(Node_t *node1, Node_t *node2) {
+Node_t* mergeNodes(Node_t *node1, Node_t *node2) {
     int node1Size = node1 -> size;
     int node2Size = node2 -> size;
 
@@ -142,6 +142,8 @@ void mergeNodes(Node_t *node1, Node_t *node2) {
 
     node1 -> size = node1Size + node2Size + sizeof(Node_t);
     node1 -> next = nextNode;
+
+    return node1;
 }
 
 /*
@@ -167,11 +169,11 @@ void mergeBuddyNodes(Node_t *node) {
             Node_t *buddyNode = buddyNodeAddr;
             
             // Check if the buddy is in the free list
-            if (buddyNode -> size == 0) {
+            if (buddyNode -> size != currentNode -> size) {
                 break;
             }
 
-            mergeNodes(currentNode, buddyNode);
+            currentNode = mergeNodes(currentNode, buddyNode);
         } else {
             // Buddy node is before the target node
             buddyNodeAddr -= currentNode -> size;
@@ -180,13 +182,11 @@ void mergeBuddyNodes(Node_t *node) {
             Node_t *buddyNode = buddyNodeAddr;
 
             // Check if the buddy is in the free list
-            if (buddyNode -> size == 0) {
+            if (buddyNode -> size != currentNode -> size) {
                 break;
             }
 
-            mergeNodes(buddyNode, currentNode);
-        
-            currentNode = buddyNode;
+            currentNode = mergeNodes(buddyNode, currentNode);
         }
     }
 }
